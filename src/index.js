@@ -9,7 +9,7 @@ let pkg = require('../package.json')
 let path = require('path')
 let imageminPngquant = require('imagemin-pngquant')
 
-const DEFAULT_SOURCE = '.'
+const DEFAULT_SOURCE = process.cwd()
 const DEFAULT_DIST = './dist'
 const DEFAULT_PATTERN = '[NAME][EXT]'
 const DEFAULT_EXTENSIONS = 'jpg,png'
@@ -23,6 +23,21 @@ colors.setTheme({
     success: ['green']
 })
 
+/*
+
+Utils
+
+ */
+
+/**
+ * Round at 2 decimals
+ * @param num
+ * @returns {number}
+ */
+const r2d = (num) => {
+    return Math.round(num * 100) / 100
+}
+
 /**
  * Ensure val is a boolean
  * @param val
@@ -33,109 +48,157 @@ const validateBoolean = (val) => {
 }
 
 /**
- * Validate all CLI options
- * @param options
- * @returns {*}
+ * Keep the last n level
+ * @param file
+ * @param n
  */
-const validateOptions = (options) => {
-    validateBoolean(options.clear)
-    validateBoolean(options.optimize)
-
-    options.source = path.resolve(process.cwd(), options.source)
-    options.dist = path.resolve(process.cwd(), options.dist)
-
-    return options
+const shortFile = (file, n) => {
+    return file.split('/')
+        .slice(-(n + 1))
+        .join('/')
 }
 
 /**
- * Return validated CLI options
- * @returns {*}
+ * Class Cli
  */
-const getCliOptions = () => {
-    program
-        .version(pkg.version, '-v, --version')
-        .option('-s, --source <source_folder>', 'Set source folder', DEFAULT_SOURCE)
-        .option('-d, --dist <dist_folder>', 'Set dist folder', DEFAULT_DIST)
-        .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
-        .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
-        .option('--no-clear', 'Clear dist folder')
-        .option('--no-optimize', 'Optimize images')
-        .parse(process.argv)
+class Cli {
+    execute () {
+        program
+            .version(pkg.version, '-v, --version')
+            .option('-s, --source <source_folder>', 'Set source folder', DEFAULT_SOURCE)
+            .option('-d, --dist <dist_folder>', 'Set dist folder', DEFAULT_DIST)
+            .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
+            .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
+            .option('-r, --recursive', 'recursive search', false)
+            .option('--no-clear', 'Clear dist folder')
+            .option('--no-optimize', 'Optimize images')
+            .parse(process.argv)
+    }
 
-    return validateOptions(program.opts())
+    getArguments () {
+        this.arguments = program.opts()
+        this.validateArguments()
+        return this.arguments
+    }
+
+    validateArguments () {
+        this.arguments.clear = validateBoolean(this.arguments.clear)
+        this.arguments.optimize = validateBoolean(this.arguments.optimize)
+        this.arguments.recursive = validateBoolean(this.arguments.recursive)
+
+        this.arguments.source = path.resolve(process.cwd(), this.arguments.source)
+        this.arguments.dist = path.resolve(process.cwd(), this.arguments.dist)
+    }
 }
 
 /**
- * Create file name based on pattern option
- * @param pattern
- * @param {string} name source file name
- * @param {number} index file index in list of all files
- * @returns {string}
+ * Class File
  */
-const createFileName = (pattern, name, index) => {
-    let parsed = path.parse(name)
+class File {
+    constructor (originalPath, index) {
+        this.originalPath = originalPath
+        this.index = index
+        this.originalSize = fs.statSync(this.originalPath).size / 1000000
 
-    return pattern
-        .replace('[EXT]', parsed.ext)
-        .replace('[NAME]', parsed.name)
-        .replace('[INDEX]', index)
-        .replace('[FOLDER_NAME]', parsed.dir.split('/').pop())
+        this.setDestinationPath()
+    }
+
+    setDestinationPath () {
+        let parsed = path.parse(this.originalPath)
+
+        let newFileName = options.pattern
+            .replace('[EXT]', parsed.ext)
+            .replace('[NAME]', parsed.name)
+            .replace('[INDEX]', this.index)
+            .replace('[FOLDER_NAME]', parsed.dir.split('/').pop())
+
+        this.destinationPath = path.resolve(options.dist, newFileName)
+    }
+
+    moveToDest () {
+        return fs.copyFile(this.originalPath, this.destinationPath)
+            .then(() => {
+                console.log('Moved '.success, `${shortFile(this.originalPath, 1)} => ${shortFile(this.destinationPath, 1)}`)
+            })
+    }
+
+    optimize () {
+        return new Promise((resolve, reject) => {
+            imagemin([this.originalPath], options.dist, {
+                use: [
+                    imageminMozjpeg({
+                        quality: 80
+                    }),
+                    imageminPngquant({
+                        quality: '65-80'
+                    })
+                ]
+            })
+                .then((files) => {
+                    fs.rename(files[0].path, this.destinationPath, () => {
+                        console.log('Minified and moved '.success, `${shortFile(this.originalPath, 1)} => ${shortFile(this.destinationPath, 1)}`)
+                        this.minifiedSize = fs.statSync(this.destinationPath).size / 1000000
+                        resolve()
+                    })
+                })
+                .catch((err) => {
+                    console.log(err.message.error, this.originalPath)
+                    reject()
+                })
+        })
+    }
 }
 
-const options = getCliOptions()
+const cli = new Cli()
+cli.execute()
+const options = cli.getArguments()
+
 
 // Find all files matching source and extensions options
-const globExpression = options.source + '/*.{' + options.extensions + '}'
-const filesPaths = glob.sync(globExpression)
+let globExpression = options.source
+if (options.recursive) {
+    globExpression += '/**'
+}
+globExpression += '/*.{' + options.extensions + '}'
 
-console.log(`📷 Found ${filesPaths.length} medias`)
+const files = glob.sync(globExpression)
+    .filter(filePath => path.parse(filePath).dir !== options.dist)
+    .map((originalPath, index) => new File(originalPath, index))
+
+
+const totalFilesSize = files.reduce((acc, val) => acc + val.originalSize, 0)
+console.log('###########')
+console.log(`📷  Found ${files.length} medias`)
+options.optimize && files.length > 0 && console.log(`💪  Total size: ${r2d(totalFilesSize)} Mo`)
+console.log('###########')
+
+files.length === 0 && process.exit(0)
 
 fs.ensureDir(options.dist)
     .then(() => {
         if (options.clear) {
             return fs.emptyDir(options.dist)
+                .then(() => console.log('Emptied '.success, options.dist))
         }
     })
     .then(() => {
-        let promises = filesPaths.map((filePath, index) => {
-            let newPath = path.resolve(options.dist, createFileName(options.pattern, filePath, index))
-
+        let promises = files.map((file) => {
             if (options.optimize) {
-                return optimizeImage(filePath, newPath)
+                return file.optimize()
             } else {
-                return fs.copyFile(filePath, newPath)
-                    .then(() => {
-                        console.log('success ', newPath)
-                    })
+                return file.moveToDest()
             }
         })
         return Promise.all(promises)
     })
+    .then(() => {
+        let totalFilesSizeAfter = files.reduce((acc, val) => acc + val.minifiedSize, 0)
+        let sizeDifference = totalFilesSize - totalFilesSizeAfter
+        let sizeDifferenceRatio = (sizeDifference / totalFilesSize) * 100
+        console.log('###########')
+        console.log(`💪  Total size minified: ${r2d(totalFilesSizeAfter)} Mo, saved ${r2d(sizeDifference)}Mo (${r2d(sizeDifferenceRatio)}%)`)
+        console.log('###########')
+    })
     .catch((err) => {
-        console.log(err)
+        console.log(err.message.error)
     })
-
-/**
- * Optimise une image
- * @param filePath
- * @param newPath
- * @returns {Promise.<T>}
- */
-const optimizeImage = (filePath, newPath) => {
-    return imagemin([filePath], 'dist', {
-        use: [
-            imageminMozjpeg({
-                quality: 80
-            }),
-            imageminPngquant({quality: '65-80'})
-        ]
-    })
-        .then((files) => {
-            fs.rename(files[0].path, newPath, () => {
-                console.log('success ', newPath)
-            })
-        })
-        .catch((err) => {
-            console.dir(err.message, newPath)
-        })
-}

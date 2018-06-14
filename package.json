@@ -26,7 +26,7 @@
   ],
   "main": "./lib/moveImage.min.js",
   "bin": {
-    "mic": "./bin/index.js"
+    "image-min": "./bin/index.js"
   },
   "scripts": {
     "dev": "babel src/index.js --watch --out-file lib/moveImage.min.js",

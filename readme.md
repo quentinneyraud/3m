@@ -3,7 +3,7 @@
 > Minify images (jpg, png) and rename them
 
 
-## Installation
+## Install
 
 ```bash
 npm install -g image-minify-cli
@@ -11,5 +11,9 @@ npm install -g image-minify-cli
 
 ## Usage
 
+![usage](screenshots/usage.png)
+
 ## Examples
 
+![example](screenshots/image-min.mp4)
+        
