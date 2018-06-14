@@ -7,8 +7,9 @@ let updateLog = require('single-line-log')
 let program = require('commander')
 let pkg = require('../package.json')
 let path = require('path')
+let imageminPngquant = require('imagemin-pngquant')
 
-const DEFAULT_SOURCE = './source/**/*'
+const DEFAULT_SOURCE = '.'
 const DEFAULT_DIST = './dist'
 const DEFAULT_PATTERN = '[NAME][EXT]'
 const DEFAULT_EXTENSIONS = 'jpg,png'
@@ -84,7 +85,7 @@ const createFileName = (pattern, name, index) => {
 const options = getCliOptions()
 
 // Find all files matching source and extensions options
-const globExpression = options.source + '.{' + options.extensions + '}'
+const globExpression = options.source + '/*.{' + options.extensions + '}'
 const filesPaths = glob.sync(globExpression)
 
 console.log(`📷 Found ${filesPaths.length} medias`)
@@ -125,7 +126,8 @@ const optimizeImage = (filePath, newPath) => {
         use: [
             imageminMozjpeg({
                 quality: 80
-            })
+            }),
+            imageminPngquant({quality: '65-80'})
         ]
     })
         .then((files) => {
