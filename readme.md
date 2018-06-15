@@ -1,6 +1,6 @@
 # Image-minify-cli
 
-> Minify images (jpg, png) and rename them
+> Minify images (jpg, png) and rename them following a pattern
 
 
 ## Install
