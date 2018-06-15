@@ -15,5 +15,5 @@ npm install -g image-minify-cli
 
 ## Examples
 
-![example](screenshots/image-min.mp4)
+![example](screenshots/image-min.gif)
         
