@@ -182,22 +182,18 @@ fs.ensureDir(options.dist)
         }
     })
     .then(() => {
-        let promises = files.map((file) => {
-            if (options.optimize) {
-                return file.optimize()
-            } else {
-                return file.moveToDest()
-            }
-        })
+        let promises = files.map(file => (options.optimize) ? file.optimize() : file.moveToDest())
         return Promise.all(promises)
     })
     .then(() => {
-        let totalFilesSizeAfter = files.reduce((acc, val) => acc + val.minifiedSize, 0)
-        let sizeDifference = totalFilesSize - totalFilesSizeAfter
-        let sizeDifferenceRatio = (sizeDifference / totalFilesSize) * 100
-        console.log('###########')
-        console.log(`💪  Total size minified: ${r2d(totalFilesSizeAfter)} Mo, saved ${r2d(sizeDifference)}Mo (${r2d(sizeDifferenceRatio)}%)`)
-        console.log('###########')
+        if (options.optimize) {
+            let totalFilesSizeAfter = files.reduce((acc, val) => acc + val.minifiedSize, 0)
+            let sizeDifference = totalFilesSize - totalFilesSizeAfter
+            let sizeDifferenceRatio = (sizeDifference / totalFilesSize) * 100
+            console.log('###########')
+            console.log(`💪  Total size minified: ${r2d(totalFilesSizeAfter)} Mo, saved ${r2d(sizeDifference)}Mo (${r2d(sizeDifferenceRatio)}%)`)
+            console.log('###########')
+        }
     })
     .catch((err) => {
         console.log(err.message.error)
