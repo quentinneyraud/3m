@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-require('../lib/moveImage.min.js')
+let MoveImage = require('../lib/index.js').default
+let moveImage = new MoveImage()
+moveImage.process()

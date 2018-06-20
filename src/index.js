@@ -1,19 +1,10 @@
-let colors = require('colors')
-let glob = require('glob')
-let imagemin = require('imagemin')
-let imageminMozjpeg = require('imagemin-mozjpeg')
-let fs = require('fs-extra')
-let updateLog = require('single-line-log')
-let program = require('commander')
-let pkg = require('../package.json')
-let path = require('path')
-let imageminPngquant = require('imagemin-pngquant')
-
-const DEFAULT_SOURCE = process.cwd()
-const DEFAULT_DIST = './dist'
-const DEFAULT_PATTERN = '[NAME][EXT]'
-const DEFAULT_EXTENSIONS = 'jpg,png'
-const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[FOLDER_NAME]']
+import colors from 'colors'
+import Cli from './cli'
+import { lstatSync, ensureDir, emptyDir } from 'fs-extra'
+import glob from 'glob'
+import { parse } from 'path'
+import { bytesToMo, round } from './utils'
+import File from './file'
 
 // Initialize colors themes
 colors.setTheme({
@@ -23,178 +14,80 @@ colors.setTheme({
     success: ['green']
 })
 
-/*
+export default class MoveImage {
+    constructor () {
+        this.setCliArguments()
+        this.setSourceFiles()
 
-Utils
-
- */
-
-/**
- * Round at 2 decimals
- * @param num
- * @returns {number}
- */
-const r2d = (num) => {
-    return Math.round(num * 100) / 100
-}
-
-/**
- * Ensure val is a boolean
- * @param val
- * @returns {boolean}
- */
-const validateBoolean = (val) => {
-    return !!val
-}
-
-/**
- * Keep the last n level
- * @param file
- * @param n
- */
-const shortFile = (file, n) => {
-    return file.split('/')
-        .slice(-(n + 1))
-        .join('/')
-}
-
-/**
- * Class Cli
- */
-class Cli {
-    execute () {
-        program
-            .version(pkg.version, '-v, --version')
-            .option('-s, --source <source_folder>', 'Set source folder', DEFAULT_SOURCE)
-            .option('-d, --dist <dist_folder>', 'Set dist folder', DEFAULT_DIST)
-            .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
-            .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
-            .option('-r, --recursive', 'recursive search', false)
-            .option('--no-clear', 'Clear dist folder')
-            .option('--no-optimize', 'Optimize images')
-            .parse(process.argv)
+        this.sourceFilesSize = this.sourceFiles.reduce((acc, val) => acc + val.originalSize, 0)
     }
 
-    getArguments () {
-        this.arguments = program.opts()
-        this.validateArguments()
-        return this.arguments
+    setCliArguments () {
+        let cli = new Cli()
+        cli.execute()
+        this.cliArgs = cli.getArguments()
     }
 
-    validateArguments () {
-        this.arguments.clear = validateBoolean(this.arguments.clear)
-        this.arguments.optimize = validateBoolean(this.arguments.optimize)
-        this.arguments.recursive = validateBoolean(this.arguments.recursive)
+    setSourceFiles () {
+        let allFiles = []
+        this.cliArgs.sources.forEach(source => {
+            let sourceStats = lstatSync(source)
 
-        this.arguments.source = path.resolve(process.cwd(), this.arguments.source)
-        this.arguments.dist = path.resolve(process.cwd(), this.arguments.dist)
-    }
-}
+            if (sourceStats.isFile()) {
+                allFiles.push(source)
+            } else {
+                // Find all files matching source and extensions options
+                let globExpression = source
+                if (this.cliArgs.recursive) {
+                    globExpression += '/**'
+                }
+                globExpression += '/*.{' + this.cliArgs.extensions + '}'
 
-/**
- * Class File
- */
-class File {
-    constructor (originalPath, index) {
-        this.originalPath = originalPath
-        this.index = index
-        this.originalSize = fs.statSync(this.originalPath).size / 1000000
-
-        this.setDestinationPath()
-    }
-
-    setDestinationPath () {
-        let parsed = path.parse(this.originalPath)
-
-        let newFileName = options.pattern
-            .replace('[EXT]', parsed.ext)
-            .replace('[NAME]', parsed.name)
-            .replace('[INDEX]', this.index)
-            .replace('[FOLDER_NAME]', parsed.dir.split('/').pop())
-
-        this.destinationPath = path.resolve(options.dist, newFileName)
-    }
-
-    moveToDest () {
-        return fs.copyFile(this.originalPath, this.destinationPath)
-            .then(() => {
-                console.log('Moved '.success, `${shortFile(this.originalPath, 1)} => ${shortFile(this.destinationPath, 1)}`)
-            })
-    }
-
-    optimize () {
-        return new Promise((resolve, reject) => {
-            imagemin([this.originalPath], options.dist, {
-                use: [
-                    imageminMozjpeg({
-                        quality: 80
-                    }),
-                    imageminPngquant({
-                        quality: '65-80'
-                    })
-                ]
-            })
-                .then((files) => {
-                    fs.rename(files[0].path, this.destinationPath, () => {
-                        console.log('Minified and moved '.success, `${shortFile(this.originalPath, 1)} => ${shortFile(this.destinationPath, 1)}`)
-                        this.minifiedSize = fs.statSync(this.destinationPath).size / 1000000
-                        resolve()
-                    })
-                })
-                .catch((err) => {
-                    console.log(err.message.error, this.originalPath)
-                    reject()
-                })
+                allFiles = allFiles.concat(glob.sync(globExpression)
+                    .filter(filePath => parse(filePath).dir !== this.cliArgs.dist))
+            }
         })
+        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.dist))
+    }
+
+    process () {
+        const special = (n) => {
+            return round(bytesToMo(n))
+        }
+
+        console.log('###########')
+        console.log(`📷  Found ${this.sourceFiles.length} medias`)
+        if (this.sourceFiles.length === 0) {
+            process.exit(1)
+        }
+        if (this.cliArgs.optimize) {
+            console.log(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
+        }
+        console.log('###########')
+
+        ensureDir(this.cliArgs.dist)
+            .then(() => {
+                if (this.cliArgs.clear) {
+                    return emptyDir(this.cliArgs.dist)
+                        .then(() => console.log('Emptied '.success, this.cliArgs.dist))
+                }
+            })
+            .then(() => {
+                let promises = this.sourceFiles.map(file => (this.cliArgs.optimize) ? file.optimize() : file.moveToDest())
+                return Promise.all(promises)
+            })
+            .then(() => {
+                if (this.cliArgs.optimize) {
+                    let totalFilesSizeAfter = this.sourceFiles.reduce((acc, val) => acc + val.minifiedSize, 0)
+                    let sizeDifference = this.sourceFilesSize - totalFilesSizeAfter
+                    let sizeDifferenceRatio = (sizeDifference / this.sourceFilesSize) * 100
+                    console.log('###########')
+                    console.log(`💪  Total size minified: ${special(totalFilesSizeAfter)} Mo, saved ${special(sizeDifference)}Mo (${round(sizeDifferenceRatio)}%)`)
+                    console.log('###########')
+                }
+            })
+            .catch((err) => {
+                console.log(err.message.error)
+            })
     }
 }
-
-const cli = new Cli()
-cli.execute()
-const options = cli.getArguments()
-
-
-// Find all files matching source and extensions options
-let globExpression = options.source
-if (options.recursive) {
-    globExpression += '/**'
-}
-globExpression += '/*.{' + options.extensions + '}'
-
-const files = glob.sync(globExpression)
-    .filter(filePath => path.parse(filePath).dir !== options.dist)
-    .map((originalPath, index) => new File(originalPath, index))
-
-
-const totalFilesSize = files.reduce((acc, val) => acc + val.originalSize, 0)
-console.log('###########')
-console.log(`📷  Found ${files.length} medias`)
-options.optimize && files.length > 0 && console.log(`💪  Total size: ${r2d(totalFilesSize)} Mo`)
-console.log('###########')
-
-files.length === 0 && process.exit(0)
-
-fs.ensureDir(options.dist)
-    .then(() => {
-        if (options.clear) {
-            return fs.emptyDir(options.dist)
-                .then(() => console.log('Emptied '.success, options.dist))
-        }
-    })
-    .then(() => {
-        let promises = files.map(file => (options.optimize) ? file.optimize() : file.moveToDest())
-        return Promise.all(promises)
-    })
-    .then(() => {
-        if (options.optimize) {
-            let totalFilesSizeAfter = files.reduce((acc, val) => acc + val.minifiedSize, 0)
-            let sizeDifference = totalFilesSize - totalFilesSizeAfter
-            let sizeDifferenceRatio = (sizeDifference / totalFilesSize) * 100
-            console.log('###########')
-            console.log(`💪  Total size minified: ${r2d(totalFilesSizeAfter)} Mo, saved ${r2d(sizeDifference)}Mo (${r2d(sizeDifferenceRatio)}%)`)
-            console.log('###########')
-        }
-    })
-    .catch((err) => {
-        console.log(err.message.error)
-    })

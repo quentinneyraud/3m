@@ -24,13 +24,13 @@
   "files": [
     "lib"
   ],
-  "main": "./lib/moveImage.min.js",
+  "main": "./lib/index.js",
   "bin": {
     "image-min": "./bin/index.js"
   },
   "scripts": {
-    "dev": "babel src/index.js --watch --out-file lib/moveImage.min.js",
-    "build": "babel src/index.js --out-file lib/moveImage.min.js",
+    "dev": "babel src --out-dir lib --watch",
+    "build": "babel src --out-dir lib",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -42,10 +42,10 @@
     "imagemin": "^5.3.1",
     "imagemin-mozjpeg": "^7.0.0",
     "imagemin-pngquant": "^5.1.0",
-    "single-line-log": "^1.1.2",
     "spawn-sync": "^2.0.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0"
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
   }
 }
