@@ -1439,6 +1439,13 @@ glob-stream@^5.3.2:
     to-absolute-glob "^0.1.1"
     unique-stream "^2.0.2"
 
+glob-tree-list@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/glob-tree-list/-/glob-tree-list-1.0.3.tgz#72674c3087910c21fc913d085a855c5de3a2cd69"
+  dependencies:
+    string-natural-compare "^2.0.2"
+    upath2 "^2.1.2"
+
 glob@^5.0.3:
   version "5.0.15"
   resolved "https://registry.yarnpkg.com/glob/-/glob-5.0.15.tgz#1bc936b9e02f4a603fcc222ecf7633d30b8b93b1"
@@ -2776,6 +2783,10 @@ stream-shift@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/stream-shift/-/stream-shift-1.0.0.tgz#d5c752825e5367e786f78e18e445ea223a155952"
 
+string-natural-compare@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/string-natural-compare/-/string-natural-compare-2.0.2.tgz#c5ce4e278ab5d1265ae6fc55435aeb7b76fcb001"
+
 string-width@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-1.0.2.tgz#118bdf5b8cdc51a2a7e70d211e07e2b0b9b107d3"
@@ -3015,6 +3026,10 @@ universalify@^0.1.0:
 unzip-response@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/unzip-response/-/unzip-response-1.0.2.tgz#b984f0877fc0a89c2c773cc1ef7b5b232b5b06fe"
+
+upath2@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/upath2/-/upath2-2.1.2.tgz#29a8089f957e9725331563fb934e5cc7d9795c5f"
 
 url-parse-lax@^1.0.0:
   version "1.0.0"

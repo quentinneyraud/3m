@@ -1,10 +1,12 @@
 import Cli from './cli'
 import { lstatSync, ensureDir, emptyDir } from 'fs-extra'
 import glob from 'glob'
-import { parse } from 'path'
+import { parse, dirname } from 'path'
 import { booleanToEmoji, bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
+import { globToTree } from 'glob-tree-list'
+import util from 'util'
 
 export default class MoveImage {
     constructor () {
@@ -42,7 +44,20 @@ export default class MoveImage {
                 }))
             }
         })
-        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.outputDir))
+
+        // Remove possible duplicate
+        allFiles = Array.from(new Set(allFiles))
+
+        let allFilesIndexInDir = allFiles.reduce((acc, file) => {
+            acc.indexs[dirname(file)] = acc.indexs[dirname(file)] || 0
+            acc.indexs[dirname(file)]++
+
+            acc[file] = acc.indexs[dirname(file)]
+
+            return acc
+        }, { indexs: {} })
+
+        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, allFilesIndexInDir[originalPath], this.cliArgs.pattern, this.cliArgs.outputDir))
     }
 
     onFileProcessed (fileAction) {

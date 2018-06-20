@@ -5,8 +5,8 @@ import { validateBoolean } from './utils'
 
 const DEFAULT_DESTINATION = './dist'
 const DEFAULT_PATTERN = '[NAME][EXT]'
-const DEFAULT_EXTENSIONS = 'jpg,png'
-const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[DIRECTORY_NAME]']
+const DEFAULT_EXTENSIONS = 'jpg,jpeg,png'
+const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[DIR_NAME]']
 
 /**
  * Class Cli

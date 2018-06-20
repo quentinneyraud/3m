@@ -9,7 +9,7 @@ import Log from './Log'
 const CAN_MINIFY = ['.jpg', '.jpeg', '.png']
 
 export default class File {
-    constructor (originalPath, index, patternCliArg, destinationCliArg) {
+    constructor (originalPath, index, indexInDirectory, patternCliArg, destinationCliArg) {
         let parsed = parse(originalPath)
         this.source = {
             path: originalPath,
@@ -21,6 +21,7 @@ export default class File {
             directory: destinationCliArg
         }
         this.index = index
+        this.indexInDirectory = indexInDirectory
         this.patternCliArg = patternCliArg
         this.extension = parsed.ext
 
@@ -32,7 +33,8 @@ export default class File {
             .replace('[EXT]', this.extension)
             .replace('[NAME]', this.source.name)
             .replace('[INDEX]', this.index)
-            .replace('[DIRECTORY_NAME]', this.source.directory)
+            .replace('[INDEX_IN_DIR]', this.indexInDirectory)
+            .replace('[DIR_NAME]', this.source.directory)
 
         this.destination.path = resolve(this.destination.directory, newFileName)
     }
