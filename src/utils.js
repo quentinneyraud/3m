@@ -31,7 +31,7 @@ export const validateBoolean = (val) => {
  * @param file
  * @param n
  */
-export const shortFile = (file, n) => {
+export const shortFile = (file, n = 2) => {
     return file.split('/')
         .slice(-(n + 1))
         .join('/')

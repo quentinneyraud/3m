@@ -8,10 +8,11 @@ import Log from './Log'
 
 export default class MoveImage {
     constructor () {
+        this.sourceFiles = []
+
         this.setCliArguments()
         this.setSourceFiles()
 
-        this.sourceFiles = []
         this.sourceFilesSize = this.sourceFiles.reduce((acc, file) => acc + file.source.size, 0)
     }
 
@@ -44,12 +45,27 @@ export default class MoveImage {
         this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.destination))
     }
 
+    onFileProcessed (fileAction) {
+        this.filesOk++
+        fileAction.progress = `${this.filesOk}/${this.sourceFiles.length}`
+
+        if (fileAction.status === 'success') {
+            Log.successAction(fileAction)
+        } else {
+            Log.errorAction(fileAction)
+        }
+    }
+
     process () {
+        this.filesOk = 0
         const special = (n) => {
             return round(bytesToMo(n))
         }
 
+        // Log infos
         Log.separator()
+        Log.empty()
+        Log.empty()
         Log.basic(`📷  Found ${this.sourceFiles.length} medias`)
         if (this.sourceFiles.length === 0) {
             process.exit(1)
@@ -57,30 +73,38 @@ export default class MoveImage {
         if (this.cliArgs.minify) {
             Log.basic(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
         }
+        Log.empty()
+        Log.empty()
         Log.separator()
+        Log.empty()
 
         ensureDir(this.cliArgs.destination)
             .then(() => {
                 if (this.cliArgs.clear) {
                     return emptyDir(this.cliArgs.destination)
-                        .then(() => Log.action('Emptied '.success, this.cliArgs.destination))
+                        .then(() => Log.success('Emptied', this.cliArgs.destination))
                 }
             })
             .then(() => {
-                let promises = this.sourceFiles.map(file => (this.cliArgs.minify) ? file.minifyAndMove() : file.moveToDest())
+                let promises = this.sourceFiles.map(file => (this.cliArgs.minify) ? file.minifyAndMove().then(this.onFileProcessed.bind(this)) : file.moveToDest().then(this.onFileProcessed.bind(this)))
                 return Promise.all(promises)
             })
             .then(() => {
+                Log.empty()
                 if (this.cliArgs.minify) {
                     let totalFilesSizeAfter = this.sourceFiles.reduce((acc, file) => acc + file.destination.size, 0)
                     let minInfos = minificationInfos(this.sourceFilesSize, totalFilesSizeAfter)
                     Log.separator()
+                    Log.empty()
+                    Log.empty()
                     Log.basic(`💪  Total size minified: ${special(totalFilesSizeAfter)} Mo, saved ${special(minInfos.difference)}Mo (${round(minInfos.ratio)}%)`)
+                    Log.empty()
+                    Log.empty()
                     Log.separator()
                 }
             })
             .catch((err) => {
-                Log.error(err.message.error)
+                Log.error('Error', err.message.error)
             })
     }
 }

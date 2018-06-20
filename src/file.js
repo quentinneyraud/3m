@@ -40,18 +40,18 @@ export default class File {
     moveToDest () {
         return copyFile(this.source.path, this.destination.path)
             .then(() => {
-                Log.action('Moved '.success,
-                    `${shortFile(this.source.path, 1)} => ${shortFile(this.destination.path, 1)}`)
+                return {
+                    status: 'success',
+                    type: 'move',
+                    title: 'Moved',
+                    source: this.source,
+                    destination: this.destination
+                }
             })
     }
 
     minifyAndMove () {
-        const special = (n) => {
-            return round(bytesToMo(n))
-        }
-
         if (CAN_MINIFY.indexOf(this.extension) < 0) {
-            Log.warning('Cannot minify', this.source.path)
             this.destination.size = this.source.size
             return this.moveToDest()
         }
@@ -70,16 +70,29 @@ export default class File {
                 .then((files) => {
                     rename(files[0].path, this.destination.path, () => {
                         this.destination.size = statSync(this.destination.path).size
-                        let minInfos = minificationInfos(this.source.size, this.destination.size)
+                        // let minInfos = minificationInfos(this.source.size, this.destination.size)
+                        /*Log.separator()
                         Log.action('Minified and moved '.success,
                             `${shortFile(this.source.path, 1)} (${special(this.source.size)}Mo) => ${shortFile(this.destination.path, 1)} (${special(this.destination.size)}Mo)`,
                             `saved ${special(minInfos.difference)}Mo (${round(minInfos.ratio)}%)`)
-                        resolve()
+                        Log.separator()*/
+                        resolve({
+                            status: 'success',
+                            type: 'minify',
+                            title: 'Minified and moved',
+                            source: this.source,
+                            destination: this.destination
+                        })
                     })
                 })
                 .catch((err) => {
-                    Log.error(err.message, this.source.path)
-                    reject()
+                    reject({
+                        status: 'error',
+                        title: 'Error',
+                        error: err,
+                        source: this.source,
+                        destination: this.destination
+                    })
                 })
         })
     }

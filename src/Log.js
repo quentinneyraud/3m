@@ -1,7 +1,9 @@
 import colors from 'colors'
+import { bytesToMo, minificationInfos, round, shortFile } from './utils'
 
-const SEPARATOR = '#############'
-const TITLE_PAD = 40
+const SEPARATOR_CHAR = '#'
+const WIDTH = 100
+const PAD = 30
 
 // Initialize colors themes
 colors.setTheme({
@@ -12,30 +14,50 @@ colors.setTheme({
 })
 
 class Log {
-    separator () {
-        this.empty()
-        console.log(SEPARATOR)
-        this.empty()
+    separator (char = SEPARATOR_CHAR, length = WIDTH) {
+        console.log(char.repeat(length))
     }
 
     empty () {
         console.log()
     }
 
-    action (title, move, infos = '') {
-        console.log(title.padEnd(TITLE_PAD), move.padEnd(100), infos)
+    success (title, infos = '') {
+        console.log(title.padEnd(PAD).success, infos)
     }
 
-    error (message, infos) {
-        console.log(message.error.padEnd(TITLE_PAD), infos)
+    error (title, infos = '') {
+        console.log(title.padEnd(PAD).error, infos)
     }
 
-    warning (message, infos) {
-        console.log(message.warning.padEnd(TITLE_PAD), infos)
+    warning (title, infos = '') {
+        console.log(title.padEnd(PAD).warning, infos)
     }
 
     basic (message) {
         console.log(message)
+    }
+
+    successAction (actionInfos) {
+        this.separator('-', WIDTH)
+        console.log(actionInfos.title.padEnd(WIDTH - 1 - actionInfos.progress.length).success, actionInfos.progress)
+        this.empty()
+        console.log('From:'.padEnd(PAD), shortFile(actionInfos.source.path))
+        console.log('To:'.padEnd(PAD), shortFile(actionInfos.destination.path))
+
+        if (actionInfos.type === 'minify') {
+            let minInfos = minificationInfos(actionInfos.source.size, actionInfos.destination.size)
+            console.log('Saved:'.padEnd(PAD), `saved ${round(bytesToMo(minInfos.difference))}Mo (${round(minInfos.ratio)}%)`)
+        }
+    }
+
+    errorAction (actionInfos) {
+        this.separator('-', WIDTH)
+        console.log(actionInfos.title.padEnd(WIDTH - 1 - actionInfos.progress.length).error, actionInfos.progress)
+        this.empty()
+        console.log('From:'.padEnd(PAD), shortFile(actionInfos.source.path))
+        console.log('To:'.padEnd(PAD), shortFile(actionInfos.destination.path))
+        console.log('Error:'.padEnd(PAD), actionInfos.error.message)
     }
 }
 
