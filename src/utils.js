@@ -36,3 +36,15 @@ export const shortFile = (file, n) => {
         .slice(-(n + 1))
         .join('/')
 }
+
+/**
+ * Return infos about minification
+ * @param sizeBefore
+ * @param sizeAfter
+ */
+export const minificationInfos = (sizeBefore, sizeAfter) => {
+    return {
+        difference: sizeBefore - sizeAfter,
+        ratio: ((sizeBefore - sizeAfter) / sizeBefore) * 100
+    }
+}

@@ -1,18 +1,10 @@
-import colors from 'colors'
 import Cli from './cli'
 import { lstatSync, ensureDir, emptyDir } from 'fs-extra'
 import glob from 'glob'
 import { parse } from 'path'
-import { bytesToMo, round } from './utils'
+import { bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
-
-// Initialize colors themes
-colors.setTheme({
-    info: ['yellow'],
-    warning: ['yellow'],
-    error: ['red', 'underline'],
-    success: ['green']
-})
+import Log from './Log'
 
 export default class MoveImage {
     constructor () {
@@ -55,21 +47,21 @@ export default class MoveImage {
             return round(bytesToMo(n))
         }
 
-        console.log('###########')
-        console.log(`📷  Found ${this.sourceFiles.length} medias`)
+        Log.separator()
+        Log.basic(`📷  Found ${this.sourceFiles.length} medias`)
         if (this.sourceFiles.length === 0) {
             process.exit(1)
         }
         if (this.cliArgs.minify) {
-            console.log(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
+            Log.basic(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
         }
-        console.log('###########')
+        Log.separator()
 
         ensureDir(this.cliArgs.destination)
             .then(() => {
                 if (this.cliArgs.clear) {
                     return emptyDir(this.cliArgs.destination)
-                        .then(() => console.log('Emptied '.padEnd(30).success, this.cliArgs.destination))
+                        .then(() => Log.action('Emptied '.success, this.cliArgs.destination))
                 }
             })
             .then(() => {
@@ -79,15 +71,14 @@ export default class MoveImage {
             .then(() => {
                 if (this.cliArgs.minify) {
                     let totalFilesSizeAfter = this.sourceFiles.reduce((acc, file) => acc + file.destination.size, 0)
-                    let sizeDifference = this.sourceFilesSize - totalFilesSizeAfter
-                    let sizeDifferenceRatio = (sizeDifference / this.sourceFilesSize) * 100
-                    console.log('###########')
-                    console.log(`💪  Total size minified: ${special(totalFilesSizeAfter)} Mo, saved ${special(sizeDifference)}Mo (${round(sizeDifferenceRatio)}%)`)
-                    console.log('###########')
+                    let minInfos = minificationInfos(this.sourceFilesSize, totalFilesSizeAfter)
+                    Log.separator()
+                    Log.basic(`💪  Total size minified: ${special(totalFilesSizeAfter)} Mo, saved ${special(minInfos.difference)}Mo (${round(minInfos.ratio)}%)`)
+                    Log.separator()
                 }
             })
             .catch((err) => {
-                console.log(err.message.error)
+                Log.error(err.message.error)
             })
     }
 }
