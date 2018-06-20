@@ -6,7 +6,7 @@ import { validateBoolean } from './utils'
 const DEFAULT_DESTINATION = './dist'
 const DEFAULT_PATTERN = '[NAME][EXT]'
 const DEFAULT_EXTENSIONS = 'jpg,png'
-const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[FOLDER_NAME]']
+const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[DIRECTORY_NAME]']
 
 /**
  * Class Cli
@@ -16,11 +16,11 @@ export default class Cli {
         program
             .version(version, '-v, --version')
             .usage('[options] <file ...>')
-            .option('-o, --output-dir <dist_folder>', 'Set destination folder', DEFAULT_DESTINATION)
+            .option('-o, --output-dir <destination directory>', 'Set destination directory', DEFAULT_DESTINATION)
             .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
             .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
             .option('-r, --recursive', 'recursive search', false)
-            .option('--no-clear', 'Clear destination folder')
+            .option('--no-clear', 'Clear destination directory')
             .option('--no-minify', 'Minify medias')
             .parse(process.argv)
     }

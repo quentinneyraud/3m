@@ -32,7 +32,7 @@ export default class File {
             .replace('[EXT]', this.extension)
             .replace('[NAME]', this.source.name)
             .replace('[INDEX]', this.index)
-            .replace('[FOLDER_NAME]', this.source.directory)
+            .replace('[DIRECTORY_NAME]', this.source.directory)
 
         this.destination.path = resolve(this.destination.directory, newFileName)
     }
