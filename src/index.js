@@ -11,6 +11,7 @@ export default class MoveImage {
         this.setCliArguments()
         this.setSourceFiles()
 
+        this.sourceFiles = []
         this.sourceFilesSize = this.sourceFiles.reduce((acc, file) => acc + file.source.size, 0)
     }
 
@@ -35,8 +36,9 @@ export default class MoveImage {
                 }
                 globExpression += '/*.{' + this.cliArgs.extensions + '}'
 
-                allFiles = allFiles.concat(glob.sync(globExpression)
-                    .filter(filePath => parse(filePath).dir !== this.cliArgs.destination))
+                allFiles = allFiles.concat(glob.sync(globExpression, {
+                    ignore: this.cliArgs.destination + '/**/*'
+                }))
             }
         })
         this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.destination))
