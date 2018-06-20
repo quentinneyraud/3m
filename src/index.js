@@ -19,7 +19,7 @@ export default class MoveImage {
         this.setCliArguments()
         this.setSourceFiles()
 
-        this.sourceFilesSize = this.sourceFiles.reduce((acc, val) => acc + val.originalSize, 0)
+        this.sourceFilesSize = this.sourceFiles.reduce((acc, file) => acc + file.source.size, 0)
     }
 
     setCliArguments () {
@@ -60,7 +60,7 @@ export default class MoveImage {
         if (this.sourceFiles.length === 0) {
             process.exit(1)
         }
-        if (this.cliArgs.optimize) {
+        if (this.cliArgs.minify) {
             console.log(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
         }
         console.log('###########')
@@ -69,16 +69,16 @@ export default class MoveImage {
             .then(() => {
                 if (this.cliArgs.clear) {
                     return emptyDir(this.cliArgs.destination)
-                        .then(() => console.log('Emptied '.success, this.cliArgs.destination))
+                        .then(() => console.log('Emptied '.padEnd(30).success, this.cliArgs.destination))
                 }
             })
             .then(() => {
-                let promises = this.sourceFiles.map(file => (this.cliArgs.optimize) ? file.optimize() : file.moveToDest())
+                let promises = this.sourceFiles.map(file => (this.cliArgs.minify) ? file.minifyAndMove() : file.moveToDest())
                 return Promise.all(promises)
             })
             .then(() => {
-                if (this.cliArgs.optimize) {
-                    let totalFilesSizeAfter = this.sourceFiles.reduce((acc, val) => acc + val.minifiedSize, 0)
+                if (this.cliArgs.minify) {
+                    let totalFilesSizeAfter = this.sourceFiles.reduce((acc, file) => acc + file.destination.size, 0)
                     let sizeDifference = this.sourceFilesSize - totalFilesSizeAfter
                     let sizeDifferenceRatio = (sizeDifference / this.sourceFilesSize) * 100
                     console.log('###########')

@@ -21,7 +21,7 @@ export default class Cli {
             .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
             .option('-r, --recursive', 'recursive search', false)
             .option('--no-clear', 'Clear destination folder')
-            .option('--no-optimize', 'Optimize images')
+            .option('--no-minify', 'Minify medias')
             .parse(process.argv)
     }
 
@@ -34,7 +34,7 @@ export default class Cli {
 
     validateArguments () {
         this.arguments.clear = validateBoolean(this.arguments.clear)
-        this.arguments.optimize = validateBoolean(this.arguments.optimize)
+        this.arguments.minify = validateBoolean(this.arguments.minify)
         this.arguments.recursive = validateBoolean(this.arguments.recursive)
 
         this.arguments.sources = this.arguments.sources.map(source => resolve(process.cwd(), source))
