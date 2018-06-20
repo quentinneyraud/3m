@@ -27,11 +27,11 @@ class Log {
     }
 
     error (message, infos) {
-        console.log(message.padEnd(TITLE_PAD).error, infos)
+        console.log(message.error.padEnd(TITLE_PAD), infos)
     }
 
     warning (message, infos) {
-        console.log(message.padEnd(TITLE_PAD).warning, infos)
+        console.log(message.warning.padEnd(TITLE_PAD), infos)
     }
 
     basic (message) {

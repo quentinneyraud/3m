@@ -51,7 +51,7 @@ export default class File {
         }
 
         if (CAN_MINIFY.indexOf(this.extension) < 0) {
-            Log.warning('Cannot minify ', this.source.path)
+            Log.warning('Cannot minify', this.source.path)
             this.destination.size = this.source.size
             return this.moveToDest()
         }
