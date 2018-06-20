@@ -68,7 +68,7 @@ export default class File {
                 ]
             })
                 .then((files) => {
-                    rename(files[0].path, this.destination.directory, () => {
+                    rename(files[0].path, this.destination.path, () => {
                         this.destination.size = statSync(this.destination.path).size
                         let minInfos = minificationInfos(this.source.size, this.destination.size)
                         Log.action('Minified and moved '.success,

@@ -5,7 +5,6 @@ import { parse } from 'path'
 import { bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
-import inquirer from 'inquirer'
 
 export default class MoveImage {
     constructor () {
