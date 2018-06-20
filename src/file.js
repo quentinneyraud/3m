@@ -6,11 +6,11 @@ import imageminMozjpeg from 'imagemin-mozjpeg'
 import imageminPngquant from 'imagemin-pngquant'
 
 export default class File {
-    constructor (originalPath, index, patternCliArg, distCliArg) {
+    constructor (originalPath, index, patternCliArg, destinationCliArg) {
         this.originalPath = originalPath
         this.index = index
         this.originalSize = statSync(this.originalPath).size
-        this.distDirectory = distCliArg
+        this.destinationDirectory = destinationCliArg
         this.patternCliArg = patternCliArg
 
         this.setDestinationPath()
@@ -25,7 +25,7 @@ export default class File {
             .replace('[INDEX]', this.index)
             .replace('[FOLDER_NAME]', parsed.dir.split('/').pop())
 
-        this.destinationPath = resolve(this.distDirectory, newFileName)
+        this.destinationPath = resolve(this.destinationDirectory, newFileName)
     }
 
     moveToDest () {
@@ -37,7 +37,7 @@ export default class File {
 
     optimize () {
         return new Promise((resolve, reject) => {
-            imagemin([this.originalPath], this.distDirectory, {
+            imagemin([this.originalPath], this.destinationDirectory, {
                 use: [
                     imageminMozjpeg({
                         quality: 80

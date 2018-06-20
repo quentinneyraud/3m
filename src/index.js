@@ -44,10 +44,10 @@ export default class MoveImage {
                 globExpression += '/*.{' + this.cliArgs.extensions + '}'
 
                 allFiles = allFiles.concat(glob.sync(globExpression)
-                    .filter(filePath => parse(filePath).dir !== this.cliArgs.dist))
+                    .filter(filePath => parse(filePath).dir !== this.cliArgs.destination))
             }
         })
-        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.dist))
+        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.destination))
     }
 
     process () {
@@ -65,11 +65,11 @@ export default class MoveImage {
         }
         console.log('###########')
 
-        ensureDir(this.cliArgs.dist)
+        ensureDir(this.cliArgs.destination)
             .then(() => {
                 if (this.cliArgs.clear) {
-                    return emptyDir(this.cliArgs.dist)
-                        .then(() => console.log('Emptied '.success, this.cliArgs.dist))
+                    return emptyDir(this.cliArgs.destination)
+                        .then(() => console.log('Emptied '.success, this.cliArgs.destination))
                 }
             })
             .then(() => {
