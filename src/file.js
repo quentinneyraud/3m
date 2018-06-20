@@ -1,10 +1,8 @@
-import { statSync, copyFile, rename } from 'fs-extra'
+import { copyFile, rename, statSync } from 'fs-extra'
 import { parse, resolve } from 'path'
-import { bytesToMo, minificationInfos, round, shortFile } from './utils'
 import imagemin from 'imagemin'
 import imageminMozjpeg from 'imagemin-mozjpeg'
 import imageminPngquant from 'imagemin-pngquant'
-import Log from './Log'
 
 const CAN_MINIFY = ['.jpg', '.jpeg', '.png']
 
@@ -72,12 +70,6 @@ export default class File {
                 .then((files) => {
                     rename(files[0].path, this.destination.path, () => {
                         this.destination.size = statSync(this.destination.path).size
-                        // let minInfos = minificationInfos(this.source.size, this.destination.size)
-                        /*Log.separator()
-                        Log.action('Minified and moved '.success,
-                            `${shortFile(this.source.path, 1)} (${special(this.source.size)}Mo) => ${shortFile(this.destination.path, 1)} (${special(this.destination.size)}Mo)`,
-                            `saved ${special(minInfos.difference)}Mo (${round(minInfos.ratio)}%)`)
-                        Log.separator()*/
                         resolve({
                             status: 'success',
                             type: 'minify',

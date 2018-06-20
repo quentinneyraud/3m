@@ -1,12 +1,10 @@
 import Cli from './cli'
-import { lstatSync, ensureDir, emptyDir } from 'fs-extra'
+import { emptyDir, ensureDir, lstatSync } from 'fs-extra'
 import glob from 'glob'
-import { parse, dirname } from 'path'
+import { dirname, parse } from 'path'
 import { booleanToEmoji, bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
-import { globToTree } from 'glob-tree-list'
-import util from 'util'
 
 export default class MoveImage {
     constructor () {
@@ -55,7 +53,7 @@ export default class MoveImage {
             acc[file] = acc.indexs[dirname(file)]
 
             return acc
-        }, { indexs: {} })
+        }, {indexs: {}})
 
         this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, allFilesIndexInDir[originalPath], this.cliArgs.pattern, this.cliArgs.outputDir))
     }
