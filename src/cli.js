@@ -16,7 +16,7 @@ export default class Cli {
         program
             .version(version, '-v, --version')
             .usage('[options] <file ...>')
-            .option('-d, --dist <dist_folder>', 'Set destination folder', DEFAULT_DESTINATION)
+            .option('-o, --output-dir <dist_folder>', 'Set destination folder', DEFAULT_DESTINATION)
             .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
             .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
             .option('-r, --recursive', 'recursive search', false)
@@ -38,6 +38,6 @@ export default class Cli {
         this.arguments.recursive = validateBoolean(this.arguments.recursive)
 
         this.arguments.sources = this.arguments.sources.map(source => resolve(process.cwd(), source))
-        this.arguments.destination = resolve(process.cwd(), this.arguments.dist)
+        this.arguments.outputDir = resolve(process.cwd(), this.arguments.outputDir)
     }
 }

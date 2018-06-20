@@ -2,7 +2,7 @@ import Cli from './cli'
 import { lstatSync, ensureDir, emptyDir } from 'fs-extra'
 import glob from 'glob'
 import { parse } from 'path'
-import { bytesToMo, minificationInfos, round } from './utils'
+import { booleanToEmoji, bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
 
@@ -38,11 +38,11 @@ export default class MoveImage {
                 globExpression += '/*.{' + this.cliArgs.extensions + '}'
 
                 allFiles = allFiles.concat(glob.sync(globExpression, {
-                    ignore: this.cliArgs.destination + '/**/*'
+                    ignore: this.cliArgs.outputDir + '/**/*'
                 }))
             }
         })
-        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.destination))
+        this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, this.cliArgs.pattern, this.cliArgs.outputDir))
     }
 
     onFileProcessed (fileAction) {
@@ -65,7 +65,16 @@ export default class MoveImage {
         // Log infos
         Log.separator()
         Log.empty()
+        Log.basic('Source(s):', `${this.cliArgs.sources.join(', ')}`)
+        Log.basic('Destination directory:', `${this.cliArgs.outputDir}`)
+        Log.basic('Extensions:', `${this.cliArgs.extensions}`)
+        Log.basic('Pattern:', `${this.cliArgs.pattern}`)
+        Log.basic('Clear destination:', booleanToEmoji(this.cliArgs.clear))
+        Log.basic('Minify medias:', booleanToEmoji(this.cliArgs.minify))
+        Log.basic('Recursive:', booleanToEmoji(this.cliArgs.recursive))
+
         Log.empty()
+
         Log.basic(`📷  Found ${this.sourceFiles.length} medias`)
         if (this.sourceFiles.length === 0) {
             process.exit(1)
@@ -74,15 +83,14 @@ export default class MoveImage {
             Log.basic(`💪  Total size: ${special(this.sourceFilesSize)} Mo`)
         }
         Log.empty()
-        Log.empty()
         Log.separator()
         Log.empty()
 
-        ensureDir(this.cliArgs.destination)
+        ensureDir(this.cliArgs.outputDir)
             .then(() => {
                 if (this.cliArgs.clear) {
-                    return emptyDir(this.cliArgs.destination)
-                        .then(() => Log.success('Emptied', this.cliArgs.destination))
+                    return emptyDir(this.cliArgs.outputDir)
+                        .then(() => Log.success('Emptied', this.cliArgs.outputDir))
                 }
             })
             .then(() => {
@@ -96,9 +104,7 @@ export default class MoveImage {
                     let minInfos = minificationInfos(this.sourceFilesSize, totalFilesSizeAfter)
                     Log.separator()
                     Log.empty()
-                    Log.empty()
                     Log.basic(`💪  Total size minified: ${special(totalFilesSizeAfter)} Mo, saved ${special(minInfos.difference)}Mo (${round(minInfos.ratio)}%)`)
-                    Log.empty()
                     Log.empty()
                     Log.separator()
                 }

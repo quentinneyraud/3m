@@ -48,3 +48,12 @@ export const minificationInfos = (sizeBefore, sizeAfter) => {
         ratio: ((sizeBefore - sizeAfter) / sizeBefore) * 100
     }
 }
+
+/**
+ * Transform boolean to emoji string
+ * @param bool
+ * @returns {string}
+ */
+export const booleanToEmoji = (bool) => {
+    return (bool) ? '✔' : '✖'
+}

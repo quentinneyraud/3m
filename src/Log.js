@@ -1,7 +1,7 @@
 import colors from 'colors'
 import { bytesToMo, minificationInfos, round, shortFile } from './utils'
 
-const SEPARATOR_CHAR = '#'
+const SEPARATOR_CHAR = '♦'
 const WIDTH = 100
 const PAD = 30
 
@@ -22,20 +22,20 @@ class Log {
         console.log()
     }
 
-    success (title, infos = '') {
-        console.log(title.padEnd(PAD).success, infos)
+    success (title, message = '') {
+        console.log(title.padEnd(PAD).success, message)
     }
 
-    error (title, infos = '') {
-        console.log(title.padEnd(PAD).error, infos)
+    error (title, message = '') {
+        console.log(title.padEnd(PAD).error, message)
     }
 
-    warning (title, infos = '') {
-        console.log(title.padEnd(PAD).warning, infos)
+    warning (title, message = '') {
+        console.log(title.padEnd(PAD).warning, message)
     }
 
-    basic (message) {
-        console.log(message)
+    basic (title, message = '') {
+        console.log(title.padEnd(PAD), message)
     }
 
     successAction (actionInfos) {
