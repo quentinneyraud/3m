@@ -1,4 +1,4 @@
-# Image-minify-cli
+# 3m (Move & Minify Medias)
 
 > Minify images (jpg, png) and rename them following a pattern
 
@@ -6,7 +6,7 @@
 ## Install
 
 ```bash
-npm install -g image-minify-cli
+npm install -g 3m
 ```
 
 ## Usage

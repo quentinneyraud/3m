@@ -1,24 +1,27 @@
 {
-  "name": "moveImage",
+  "name": "3m",
   "version": "1.0.0",
   "license": "ISC",
-  "description": "Move and optimize images",
+  "description": "Move & Minify Medias",
   "keywords": [
     "image",
-    "optimization"
+    "minification",
+    "rename",
+    "pattern",
+    "directory"
   ],
   "author": {
     "name": "Quentin Neyraud",
     "email": "quentin.neyraud@gmail.com",
     "url": "http://quentinneyraud.fr"
   },
-  "homepage": "https://github.com/quentinneyraud/moveimage#readme",
+  "homepage": "https://github.com/quentinneyraud/3m#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/quentinneyraud/moveimage"
+    "url": "https://github.com/quentinneyraud/3m"
   },
   "bugs": {
-    "url": "https://github.com/quentinneyraud/issues"
+    "url": "https://github.com/quentinneyraud/3m/issues"
   },
   "preferGlobal": true,
   "files": [

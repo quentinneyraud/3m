@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 
-let MoveImage = require('../lib/index.js').default
-let moveImage = new MoveImage()
-moveImage.process()
+let MoveMedia = require('../lib/index.js').default
+let moveMedia = new MoveMedia()
+moveMedia.process()

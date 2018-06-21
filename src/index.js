@@ -6,7 +6,7 @@ import { booleanToEmoji, bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
 
-export default class MoveImage {
+export default class MoveMedia {
     constructor () {
         this.sourceFiles = []
 
