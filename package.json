@@ -22,7 +22,8 @@
   },
   "preferGlobal": true,
   "files": [
-    "lib"
+    "lib",
+    "bin"
   ],
   "main": "./lib/index.js",
   "bin": {
