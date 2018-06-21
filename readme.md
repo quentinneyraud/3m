@@ -151,3 +151,38 @@ Given the following structure :
     ├── [4.4M]  IMG_20180423_141759.jpg
     └── [4.7M]  IMG_20180423_142342.jpg
 ```
+
+#### Minify, move and keep the same structure
+
+```sh
+3m -r --pattern [PATH]/[NAME][EXT] --extensions=jpg,mp4
+```
+
+```
+.
+├── canada
+│   ├── IMG_20180422_173241.jpg
+│   ├── IMG_20180423_135753.jpg
+│   └── VID_20180424_144512.mp4
+├── dist
+│   ├── canada
+│   │   ├── IMG_20180422_173241.jpg
+│   │   ├── IMG_20180423_135753.jpg
+│   │   └── VID_20180424_144512.mp4
+│   ├── france
+│   │   ├── IMG_20180423_143133.jpg
+│   │   ├── IMG_20180423_143339.jpg
+│   │   └── IMG_20180423_144710.jpg
+│   └── japan
+│       ├── IMG_20180422_173241.jpg
+│       ├── IMG_20180423_135753.jpg
+│       └── IMG_20180423_141640.jpg
+├── france
+│   ├── IMG_20180423_143133.jpg
+│   ├── IMG_20180423_143339.jpg
+│   └── IMG_20180423_144710.jpg
+└── japan
+    ├── IMG_20180422_173241.jpg
+    ├── IMG_20180423_135753.jpg
+    └── IMG_20180423_141640.jpg
+```
