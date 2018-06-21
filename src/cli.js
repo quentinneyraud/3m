@@ -15,8 +15,8 @@ export default class Cli {
     execute () {
         program
             .version(version, '-v, --version')
-            .usage('[options] <file ...>')
-            .option('-o, --output-dir <destination directory>', 'Set destination directory', DEFAULT_DESTINATION)
+            .usage('[options] <file or directory ...>')
+            .option('-o, --output-dir <destination directory>', 'set destination directory', DEFAULT_DESTINATION)
             .option('-p, --pattern <pattern>', 'Set files names, availables patterns : ' + AVAILABLE_PATTERN_SPECIALS.join(','), DEFAULT_PATTERN)
             .option('-e, --extensions <extensions>', 'Set extensions', DEFAULT_EXTENSIONS)
             .option('-r, --recursive', 'recursive search', false)
