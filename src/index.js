@@ -6,6 +6,9 @@ import { booleanToEmoji, bytesToMo, minificationInfos, round } from './utils'
 import File from './file'
 import Log from './Log'
 
+/**
+ * MoveMedia class
+ */
 export default class MoveMedia {
     constructor () {
         this.sourceFiles = []
@@ -16,12 +19,18 @@ export default class MoveMedia {
         this.sourceFilesSize = this.sourceFiles.reduce((acc, file) => acc + file.source.size, 0)
     }
 
+    /**
+     *  Get CLI arguments
+     */
     setCliArguments () {
         let cli = new Cli()
         cli.execute()
         this.cliArgs = cli.getArguments()
     }
 
+    /**
+     * Create all File instances in sourceFiles property
+     */
     setSourceFiles () {
         let allFiles = []
         this.cliArgs.sources.forEach(source => {
@@ -58,6 +67,10 @@ export default class MoveMedia {
         this.sourceFiles = allFiles.map((originalPath, index) => new File(originalPath, index, allFilesIndexInDir[originalPath], this.cliArgs.pattern, this.cliArgs.outputDir))
     }
 
+    /**
+     * Log result when a file is processed
+     * @param fileAction
+     */
     onFileProcessed (fileAction) {
         this.filesOk++
         fileAction.progress = `${this.filesOk}/${this.sourceFiles.length}`
@@ -69,6 +82,9 @@ export default class MoveMedia {
         }
     }
 
+    /**
+     * Process all files
+     */
     process () {
         this.filesOk = 0
         const special = (n) => {

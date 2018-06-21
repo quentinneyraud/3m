@@ -18,9 +18,14 @@ export default class File {
         this.destinationCliArg = destinationCliArg
         this.patternCliArg = patternCliArg
 
-        this.setDestinationPath()
+        this.setDestinationInfos()
     }
 
+    /**
+     * Return all infos on a path
+     * @param filePath
+     * @returns {{path: string, name: string, directoryPath: string, directoryName: string, extension: string}}
+     */
     getPathInfos (filePath) {
         let parsed = parse(filePath)
         return {
@@ -32,26 +37,43 @@ export default class File {
         }
     }
 
-    setDestinationPath () {
-        let newFileName = this.patternCliArg
+    /**
+     * Construct destination file name with provided pattern
+     * @returns {string}
+     */
+    getDestinationFileName () {
+        return this.patternCliArg
             .replace('[EXT]', this.source.extension)
             .replace('[NAME]', this.source.name)
             .replace('[INDEX]', this.index)
             .replace('[INDEX_IN_DIR]', this.indexInDirectory)
             .replace('[DIR_NAME]', this.source.directoryName)
             .replace('[PATH]', relative(process.cwd(), this.source.directoryPath))
+    }
 
-        this.destination.path = resolve(this.destinationCliArg, newFileName)
+    /**
+     * Set all infos about destination
+     */
+    setDestinationInfos () {
+        this.destination.path = resolve(this.destinationCliArg, this.getDestinationFileName())
         this.destination = {
             ...this.destination,
             ...this.getPathInfos(this.destination.path)
         }
     }
 
+    /**
+     * Ensure that destination directory exists
+     * @returns {Promise}
+     */
     createDestinationDirectory () {
         return ensureDir(this.destination.directoryPath)
     }
 
+    /**
+     * Move the file its destination directory
+     * @returns {Promise}
+     */
     moveToDest () {
         return new Promise((resolve, reject) => {
             this.createDestinationDirectory()
@@ -78,6 +100,10 @@ export default class File {
         })
     }
 
+    /**
+     * Minify and move the file its destination directory
+     * @returns {Promise}
+     */
     minifyAndMove () {
         if (CAN_MINIFY.indexOf(this.source.extension) < 0) {
             return this.moveToDest()

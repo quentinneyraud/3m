@@ -13,6 +13,9 @@ colors.setTheme({
     success: ['green']
 })
 
+/**
+ * Log class
+ */
 class Log {
     separator (char = SEPARATOR_CHAR, length = WIDTH) {
         console.log(char.repeat(length))

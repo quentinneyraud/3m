@@ -12,6 +12,9 @@ const AVAILABLE_PATTERN_SPECIALS = ['[NAME]', '[EXT]', '[INDEX]', '[DIR_NAME]', 
  * Class Cli
  */
 export default class Cli {
+    /**
+     * Set CLI infos and parse command
+     */
     execute () {
         program
             .version(version, '-v, --version')
@@ -25,6 +28,10 @@ export default class Cli {
             .parse(process.argv)
     }
 
+    /**
+     * Return all CLI arguments validated
+     * @returns {object}
+     */
     getArguments () {
         this.arguments = program.opts()
         this.arguments.sources = (program.args.length > 0) ? program.args : ['.']
@@ -32,6 +39,9 @@ export default class Cli {
         return this.arguments
     }
 
+    /**
+     * Validate CLI arguments
+     */
     validateArguments () {
         this.arguments.clear = validateBoolean(this.arguments.clear)
         this.arguments.minify = validateBoolean(this.arguments.minify)
