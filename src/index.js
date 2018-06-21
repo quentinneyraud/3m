@@ -107,7 +107,18 @@ export default class MoveMedia {
                 }
             })
             .then(() => {
-                let promises = this.sourceFiles.map(file => (this.cliArgs.minify) ? file.minifyAndMove().then(this.onFileProcessed.bind(this)) : file.moveToDest().then(this.onFileProcessed.bind(this)))
+                let promises = this.sourceFiles.map(file =>  {
+                    if (this.cliArgs.minify) {
+                        return file.minifyAndMove()
+                            .then(this.onFileProcessed.bind(this))
+                            .catch((err) => {
+                                console.log(err)
+                            })
+                    } else {
+                        return file.moveToDest()
+                            .then(this.onFileProcessed.bind(this))
+                    }
+                })
                 return Promise.all(promises)
             })
             .then(() => {
