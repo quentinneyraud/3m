@@ -30,7 +30,7 @@
   ],
   "main": "./lib/index.js",
   "bin": {
-    "image-min": "./bin/index.js"
+    "3m": "./bin/index.js"
   },
   "scripts": {
     "dev": "babel src --out-dir lib --watch",
